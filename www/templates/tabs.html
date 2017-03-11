@@ -1,0 +1,18 @@
+<!--
+Create tabs with an icon and label, using the tabs-positive style.
+Each tab's child <ion-nav-view> directive will have its own
+navigation history that also transitions its views in and out.
+-->
+<ion-tabs class="tabs-icon-top tabs-color-active-positive">
+
+  <!-- RenamerTV Tab -->
+  <ion-tab title="RenamerTV" icon-off="ion-ios-albums" icon-on="ion-ios-albums" href="#/tab/renamer">
+    <ion-nav-view name="tab-renamer"></ion-nav-view>
+  </ion-tab>
+
+  <!-- Options Tab -->
+  <ion-tab title="Options" icon-off="ion-android-options" icon-on="ion-android-options" href="#/tab/options">
+    <ion-nav-view name="tab-options"></ion-nav-view>
+  </ion-tab>
+
+</ion-tabs>

@@ -1,0 +1,8 @@
+<ion-view view-title="RenamerTV">
+  <ion-content class="padding">
+    <ion-list no-lines ng-repeat="item in items">
+		<ion-item>{{ item.name }} // {{ item.realname }}</ion-item>
+	</ion-list>
+	<button ion-button full ng-click="loadFiles()">. . .</button><button ion-button full ng-click="renameFiles()">Rename</button>
+  </ion-content>
+</ion-view>
