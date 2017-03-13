@@ -3,6 +3,8 @@
     <ion-list no-lines ng-repeat="item in items">
 		<ion-item>{{ item.name }} // {{ item.realname }}</ion-item>
 	</ion-list>
-	<button ion-button full ng-click="loadFiles()">. . .</button><button ion-button full ng-click="matchFiles()">Match</button></button><button ion-button full ng-click="renameFiles()">Rename</button>
+	<button class="button button-block button-outline button-positive" ng-click="loadFiles()">. . .</button>
+	<button class="button button-block button-outline button-positive" ng-click="matchFiles()">Matcher</button>
+	<button class="button button-block button-outline button-positive" ng-click="renameFiles()">Renommer</button>
   </ion-content>
 </ion-view>
