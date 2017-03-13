@@ -1,11 +1,7 @@
 <ion-view view-title="Options">
   <ion-content class="padding">
-    <h2>Status: {{ status }}</h2>
-	<h4>auth: {{ user.auth }}</h4>
-	<h4>confirm: {{ user.confirm }}</h4>
+    <h2>Statut : {{ status }}</h2>
 	<button ion-button ng-show=" user.auth !== 'true' " ng-click="auth()">Authentification</button>
 	<button ion-button ng-show=" user.confirm !== 'granted' " ng-click="authOK()">Confirmation</button>
-	<button ion-button ng-click="logout()">Déconnecter</button>
-	<button ion-button ng-click="test()">TEST</button>
   </ion-content>
 </ion-view>

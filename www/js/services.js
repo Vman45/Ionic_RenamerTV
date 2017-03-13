@@ -37,7 +37,7 @@ angular.module('starter.services', [])
 			var cmd = "/api/v3/login/authorize/";
 			var deferred = $q.defer();
 			
-			$http.get(host + cmd + '25').success(function(data) { 
+			$http.get(host + cmd + trackID).success(function(data) { 
 				deferred.resolve({ success: data.success, status: data.result.status, challenge: data.result.challenge, password_salt: data.result.password_salt });
 			}).error(function(msg, code) {
 				deferred.reject(msg);
@@ -139,6 +139,11 @@ angular.module('starter.services', [])
 .factory('Show', function($http, $q) {
 
 	return {
+		getExtension: function(filename)
+		{
+			var exts = filename.split(".");
+			return '.' + (exts[(exts.length-1)]);
+		},
 		getRealNameShow: function(name) {
 			
 			var urlShow = "http://api.tvmaze.com/singlesearch/shows?q=";
@@ -150,7 +155,7 @@ angular.module('starter.services', [])
 			console.log('showname', showname)
 			var show_season = /S\d{1,3}/gi.exec(name)[0].replace('S', '');
 			var show_episode = /E\d{1,3}/gi.exec(name)[0].replace('E', '');
-			var extension = '';
+			var ext = this.getExtension(name);
 			
 			var promiseStart = $q.when('start');
 
@@ -180,44 +185,13 @@ angular.module('starter.services', [])
 
 			var promiseEnd = promise2_getTvTitle.then(function () {
 				//console.log('promiseEnd')
-				var show = { id:tv.id, name: showname, title: tv.name.replace(/:/g, ' '), season: show_season, episode: show_episode, extension: '.avi' }; // debug
+				var show = { id:tv.id, name: showname, title: tv.name.replace(/:/g, ' '), season: show_season, episode: show_episode, extension: ext };
 				return show;
 			}, function (reason) {
 				return $q.reject(reason);
 			});
 
 			return promiseEnd;
-			
-		},
-		getTvID: function(name) {
-			
-			var urlShow = "http://api.tvmaze.com/singlesearch/shows?q=";
-			var deferred = $q.defer();
-			
-			$http.get(urlShow + name).success(function(data) { 
-				deferred.resolve({id: data.id});
-			}).error(function(msg, code) {
-				deferred.reject(msg);
-			});
-			
-			return deferred.promise;
-		},
-		getTvTitle: function(id, season, episode) {
-			
-			var urlFullName = "http://api.tvmaze.com/shows/{show_id}/episodebynumber?season={show_season}&number={show_episode}";
-			var deferred = $q.defer();
-			
-			var url = urlFullName.replace('{show_id}', id)
-										 .replace('{show_season}', season)
-										 .replace('{show_episode}', episode)
-										 
-			$http.get(url).success(function(data) { 
-				deferred.resolve({name: data.name});
-			}).error(function(msg, code) {
-				deferred.reject(msg);
-			});
-			
-			return deferred.promise;
 		}
 	}
 });

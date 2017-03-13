@@ -1,4 +1,4 @@
-angular.module('starter.controllers', ['starter.services'])
+angular.module('starter.controllers', ['starter.services', 'ngCordova'])
 
 .controller('RenamerCtrl', function($scope, Show, Freebox) {
 
@@ -6,25 +6,30 @@ angular.module('starter.controllers', ['starter.services'])
 	$scope.items = [];
 
 	$scope.loadFiles = function() {
-		// debug 
-		$scope.user.session_token = '6yAcAvmY2g37VoT1Zme5+OSNLuLijWCWWZRi4xtHVyj8+VhVYZn0rC3gWozZF/0D';
 		
-		console.log("session_token", $scope.user.session_token);
-		Freebox.list($scope.user.session_token).then(function(data) {
-			console.log("list", data);
-			
-			var items = [];
-			
-			angular.forEach(data.result, function(value, key) {
+		var session_token = localStorage.getItem('session_token');
+	
+		if(session_token !== null) {
+			$scope.user.session_token = session_token;		
+
+			Freebox.list($scope.user.session_token).then(function(data) {
+				console.log("list", data);
 				
-				if(value.type === 'file') {
-					var item = { name: value.name, realname: "", fullname: value.path };			
-					items.push(item);			
-				}
+				var items = [];
+				
+				angular.forEach(data.result, function(value, key) {
+					
+					if(value.type === 'file') {
+						var item = { name: value.name, realname: "", fullname: value.path };			
+						items.push(item);			
+					}
+				});
+				
+				$scope.items = items;
 			});
-			
-			$scope.items = items;
-		});
+		} else {
+			window.location.href = '#/tab/options';
+		}
 	};
 	  
 	$scope.matchFiles = function() {
@@ -48,8 +53,6 @@ angular.module('starter.controllers', ['starter.services'])
 	};
 	
 	$scope.renameFiles = function() {
-		console.log("renameFiles", $scope.items.length);
-		
 		if($scope.items.length != 0) {
 			var items = [];
 			
@@ -78,6 +81,46 @@ angular.module('starter.controllers', ['starter.services'])
 	$scope.user = {};
 	$scope.status = null;
 
+	var track_id = localStorage.getItem('track_id');
+	var session_token = localStorage.getItem('session_token');
+
+	if(track_id === null) { // Vérifie si l'application est déjà enregistrer sur la Freebox
+		$scope.status = 'Veuillez vous authentifier';
+	} else { // Vérifie si il y une session en cours
+		if(session_token === null) {
+			
+			var app_token = localStorage.getItem('app_token');
+			
+			if(app_token !== null) { // Vérifie si l'application est déjà enregistrer sur la Freebox
+				Freebox.authOK(track_id).then(function(data) {
+					if(data.success) {
+						$scope.status = 'Connecté';
+						$scope.user.auth = 'true';
+						$scope.user.challenge = data.challenge;
+						$scope.user.confirm = data.status;
+						
+						// Inverser le challenge et app_token, la documentation est fausse
+						var password = CryptoJS.HmacSHA1($scope.user.challenge, app_token);
+
+						Freebox.openSession(password.toString()).then(function(data) {
+							console.log("openSession", data.success);
+							
+							if(data.success) {
+								$scope.user.session_token = data.token;
+								localStorage.setItem('session_token', data.token);
+							}
+						});
+					} 
+				});
+			}
+		} else {
+			$scope.status = 'Connecté';
+			
+			$scope.user.auth = 'true';
+			$scope.user.confirm = 'granted';
+		}
+	}
+	
 	$scope.auth = function() {
 		// Demande d'authentification
 		Freebox.auth().then(function(data) {
@@ -85,10 +128,12 @@ angular.module('starter.controllers', ['starter.services'])
 			console.log("auth", data.token);
 
 			if(data.success) {
-				$scope.status = 'pending';
-				$scope.user.app_token = data.token; // à stocker (Storage)
+				$scope.status = "Veuillez confirmer sur l'écran de la Freebox";
+				$scope.user.app_token = data.token;
 				$scope.user.track_id = data.track_id;
 				$scope.user.auth = 'true';
+				localStorage.setItem('track_id', data.track_id);
+				localStorage.setItem('app_token', data.token);
 			}
 		});
 	};
@@ -99,14 +144,11 @@ angular.module('starter.controllers', ['starter.services'])
 			console.log("authOK", data.success);
 			
 			if(data.success) {
-				$scope.status = data.status;
+				$scope.status = 'Connecté';
 				$scope.user.auth = 'true';
 				$scope.user.challenge = data.challenge;
 				$scope.user.confirm = data.status;
 				
-				// debug
-				$scope.user.app_token = '3DnimC6tCpL7+4WM3lanek13RM+jGLWyHTmFXAElZYdBHIpBNZxpeZZKmPwBe3Xj';
-
 				// Inverser le challenge et app_token, la documentation est fausse
 				var password = CryptoJS.HmacSHA1($scope.user.challenge, $scope.user.app_token);
 
@@ -115,25 +157,10 @@ angular.module('starter.controllers', ['starter.services'])
 					
 					if(data.success) {
 						$scope.user.session_token = data.token;
+						localStorage.setItem('session_token', data.token);
 					}
 				});				
 			}
 		});
 	};
-
-	$scope.logout = function() {
-		console.log("logout");
-		
-		$scope.user = {};
-		$scope.status = null;
-	
-		// Déconnection de la Freebox
-		Freebox.logout().then(function(data) {
-			console.log("logout", data.success);
-		});
-	};
-
-	$scope.test = function() {
-		console.log("test");
-	};	
 });
