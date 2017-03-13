@@ -132,6 +132,18 @@ angular.module('starter.services', [])
 			});
 			
 			return deferred.promise;
+		},
+		apiVersion:function() {
+			var cmd = "/api_version";
+			var deferred = $q.defer();
+			
+			$http.get(host + cmd).success(function(data) { 
+				deferred.resolve({ api_version: data.api_version });
+			}).error(function(msg, code) {
+				deferred.reject(msg);
+			});
+			
+			return deferred.promise;
 		}		
 	}
 })

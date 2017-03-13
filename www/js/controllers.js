@@ -163,4 +163,14 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova'])
 			}
 		});
 	};
+
+	$scope.testSimple = function() {
+		alert('RenamerTV v1.0.1');
+	};
+
+	$scope.testConnection = function() {
+		Freebox.apiVersion().then(function(data) {
+			alert('API version: ' + data.api_version);
+		});		
+	};	
 });
