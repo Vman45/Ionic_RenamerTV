@@ -1,5 +1,0 @@
-
- - access wifi
- - get json response from an url
- - rename file
- 

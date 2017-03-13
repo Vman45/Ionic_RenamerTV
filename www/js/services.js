@@ -1,33 +1,218 @@
 angular.module('starter.services', [])
 
-.factory('ShowName', function($http, $q) {
+.factory('Freebox', function($http, $q) {
 	
-	var urlShow = "http://api.tvmaze.com/singlesearch/shows?q=";
-	var urlFullName = "http://api.tvmaze.com/shows/{show_id}/episodebynumber?season={show_season}&number={show_episode}";
+	var host = "http://mafreebox.freebox.fr";
 	
+	return {
+		auth: function() {			
+			var cmd = "/api/v3/login/authorize/";
+			var deferred = $q.defer();
+			
+			var req = {
+			 method: 'POST',
+			 url: host + cmd,
+			 headers: {
+			   'Access-Control-Allow-Origin': '*',
+			   'Content-Type': 'application/json',
+			   'charset': 'utf-8'
+			 },
+			 data: { 
+				app_id: "fr.freebox.renamertv",
+				app_name: "RenamerTV",
+				app_version: "0.0.1",
+				device_name: "PC dev"
+ 			 }
+			};
+
+			$http(req).success(function(data) { 
+				deferred.resolve({ success: data.success, token: data.result.app_token, track_id: data.result.track_id });
+			}).error(function(msg, code) {
+				deferred.reject(msg);
+			});
+			
+			return deferred.promise;
+		},
+		authOK:function(trackID) {
+			var cmd = "/api/v3/login/authorize/";
+			var deferred = $q.defer();
+			
+			$http.get(host + cmd + '25').success(function(data) { 
+				deferred.resolve({ success: data.success, status: data.result.status, challenge: data.result.challenge, password_salt: data.result.password_salt });
+			}).error(function(msg, code) {
+				deferred.reject(msg);
+			});
+			
+			return deferred.promise;
+		},
+		getChallenge:function() {
+			var cmd = "/api/v3/login/";
+			var deferred = $q.defer();
+			
+			$http.get(host + cmd).success(function(data) { 
+				deferred.resolve({ success: data.success, status: data.result.logged_in, challenge: data.result.challenge, password_salt: data.result.password_salt });
+			}).error(function(msg, code) {
+				deferred.reject(msg);
+			});
+			
+			return deferred.promise;
+		},
+		openSession:function(password) {
+			var cmd = "/api/v3/login/session/";
+			var deferred = $q.defer();
+			
+			var req = {
+			 method: 'POST',
+			 url: host + cmd,
+			 headers: {
+			   'Access-Control-Allow-Origin': '*',
+			   'Content-Type': 'application/json',
+			   'charset': 'utf-8'
+			 },
+			 data: { 
+				app_id: "fr.freebox.renamertv",
+				password: password
+ 			 }
+			};
+
+			$http(req).success(function(data) { 
+				deferred.resolve({ success: data.success, token: data.result.session_token });
+			}).error(function(msg, code) {
+				deferred.reject(msg);
+			});
+			
+			return deferred.promise;
+		},		
+		list:function(session_app) {
+			var cmd = "/api/v3/fs/ls/L0Rpc3F1ZSBkdXIvVMOpbMOpY2hhcmdlbWVudHM="; // Dossier "Téléchargements"
+			var deferred = $q.defer();
+			
+			var req = {
+			 method: 'GET',
+			 url: host + cmd,
+			 headers: {
+			   'Access-Control-Allow-Origin': '*',
+			   'Content-Type': 'application/json',
+			   'charset': 'utf-8',
+			   'X-Fbx-App-Auth': session_app
+			 },
+			};
+			
+			$http(req).success(function(data) { 
+				deferred.resolve({ success: data.success, result: data.result });
+			}).error(function(msg, code) {
+				deferred.reject(msg);
+			});
+			
+			return deferred.promise;
+		},
+		renameFile:function(src, dst, session_app) {
+			var cmd = "/api/v3/fs/rename/";
+			var deferred = $q.defer();
+			
+			var req = {
+			 method: 'POST',
+			 url: host + cmd,
+			 headers: {
+			   'Access-Control-Allow-Origin': '*',
+			   'Content-Type': 'application/json',
+			   'charset': 'utf-8',
+			   'X-Fbx-App-Auth': session_app
+			 },
+			 data: { 
+				src: src,
+				dst: dst
+ 			 }
+			};
+
+			$http(req).success(function(data) { 
+				deferred.resolve({ success: data.success, result: data.result });
+			}).error(function(msg, code) {
+				deferred.reject(msg);
+			});
+			
+			return deferred.promise;
+		}		
+	}
+})
+
+.factory('Show', function($http, $q) {
+
 	return {
 		getRealNameShow: function(name) {
 			
-			var showname = nameTV.split('.')[0];
-			var promise = this.getID(showname);
+			var urlShow = "http://api.tvmaze.com/singlesearch/shows?q=";
+			var urlFullName = "http://api.tvmaze.com/shows/{show_id}/episodebynumber?season={show_season}&number={show_episode}";
 			
-			promise.then(
-			  function(response) {
-				console.log(response.id);
-				
-				
+			console.log('getRealNameShow', name)
+			
+			var showname = name.split('.S')[0].replace(/\./g, ' ');
+			console.log('showname', showname)
+			var show_season = /S\d{1,3}/gi.exec(name)[0].replace('S', '');
+			var show_episode = /E\d{1,3}/gi.exec(name)[0].replace('E', '');
+			var extension = '';
+			
+			var promiseStart = $q.when('start');
+
+			var promise_getTvID = promiseStart.then(function () {
+				return $http.get(urlShow + showname).
+					success(function(data) {
+						//console.log('promise_getTvID', data.id)
+						tv = {
+							id: data.id
+						};
+					});
 			});
-  
-		},
-		getID: function(name) {
+				
+			var promise2_getTvTitle = promise_getTvID.then(function () {
+				var url = urlFullName.replace('{show_id}', tv.id)
+							 .replace('{show_season}', show_season)
+							 .replace('{show_episode}', show_episode)
+										 
+				return $http.get(url).
+					success(function(data) {
+						//console.log('promise2_getTvTitle', data.name)
+						tv = {
+							name: data.name
+						};
+					});
+			});
+
+			var promiseEnd = promise2_getTvTitle.then(function () {
+				//console.log('promiseEnd')
+				var show = { id:tv.id, name: showname, title: tv.name.replace(/:/g, ' '), season: show_season, episode: show_episode, extension: '.avi' }; // debug
+				return show;
+			}, function (reason) {
+				return $q.reject(reason);
+			});
+
+			return promiseEnd;
 			
+		},
+		getTvID: function(name) {
+			
+			var urlShow = "http://api.tvmaze.com/singlesearch/shows?q=";
 			var deferred = $q.defer();
 			
-			$http.get(urlShow + name)
-				.success(function(data) { 
-				deferred.resolve({
-				title: data.title,
-				cost: data.price});
+			$http.get(urlShow + name).success(function(data) { 
+				deferred.resolve({id: data.id});
+			}).error(function(msg, code) {
+				deferred.reject(msg);
+			});
+			
+			return deferred.promise;
+		},
+		getTvTitle: function(id, season, episode) {
+			
+			var urlFullName = "http://api.tvmaze.com/shows/{show_id}/episodebynumber?season={show_season}&number={show_episode}";
+			var deferred = $q.defer();
+			
+			var url = urlFullName.replace('{show_id}', id)
+										 .replace('{show_season}', season)
+										 .replace('{show_episode}', episode)
+										 
+			$http.get(url).success(function(data) { 
+				deferred.resolve({name: data.name});
 			}).error(function(msg, code) {
 				deferred.reject(msg);
 			});
@@ -35,81 +220,4 @@ angular.module('starter.services', [])
 			return deferred.promise;
 		}
 	}
- })
-
-.factory('Show', function($http) {
-
-	var urlShow = "http://api.tvmaze.com/singlesearch/shows?q=";
-	var urlFullName = "http://api.tvmaze.com/shows/{show_id}/episodebynumber?season={show_season}&number={show_episode}";
-
-	return {
-		getTest: function(name) {
- 
-			$http({
-				method : "GET",
-				url : urlShow + name.split('.')[0]
-			}).then(function mySucces(response) {
-				
-				var showname = name.split('.')[0];
-				var show_season = /S\d{1,3}/gi.exec(name)[0].replace('S', '');
-				var show_episode = /E\d{1,3}/gi.exec(name)[0].replace('E', '');
-				var id = response.data.id;
-				var url = urlFullName.replace('{show_id}', id)
-										 .replace('{show_season}', show_season)
-										 .replace('{show_episode}', show_episode)
-				
-				$http({
-					method : "GET",
-					url : url
-				}).then(function mySucces(response) {
-					
-					var realname = showname + ' ' + show_season + 'x' + show_episode + ' - ' + response.data.name;
-					console.log("getTest", realname);
-					return realname;
-				}, function myError(response) {
-					return null;
-				});
-			}, function myError(response) {
-				console.log("error", response.error);
-				return null;
-			});
-		},
-		getRealNameShow: function(nameTV) {
-			
-			var showname = nameTV.split('.')[0];
-			var show_season = /S\d{1,3}/gi.exec(nameTV)[0].replace('S', '');
-			var show_episode = /E\d{1,3}/gi.exec(nameTV)[0].replace('E', '');
-			var id = this.getID(showname);
-			var url = urlFullName.replace('{show_id}', id)
-										 .replace('{show_season}', show_season)
-										 .replace('{show_episode}', show_episode)
-			
-			console.log("url", url);
-			
-			$http({
-				method : "GET",
-				url : url
-			}).then(function mySucces(response) {
-				
-				var realname = showname + show_season + 'x' + show_episode + ' - ' + response.data.name;
-				console.log("getRealNameShow", realname);
-				return realname;
-			}, function myError(response) {
-				return null;
-			});
-		},
-		getID: function(name) {
-			
-			$http({
-				method : "GET",
-				url : urlShow + name
-			}).then(function mySucces(response) {
-				console.log("getID", response.data.id);
-				return response.data.id;
-			}, function myError(response) {
-				console.log("error", response.error);
-				return null;
-			});
-		}
-	};
 });
