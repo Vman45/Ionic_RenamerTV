@@ -6,7 +6,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova'])
 	$scope.items = [];
 
 	$scope.loadFiles = function() {
-		
+
 		var session_token = localStorage.getItem('session_token');
 	
 		if(session_token !== null) {

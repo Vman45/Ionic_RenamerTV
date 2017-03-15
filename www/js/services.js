@@ -1,4 +1,4 @@
-angular.module('starter.services', [])
+angular.module('starter.services', ['ngCordova'])
 
 .factory('Freebox', function($http, $q) {
 	
@@ -20,8 +20,8 @@ angular.module('starter.services', [])
 			 data: { 
 				app_id: "fr.freebox.renamertv",
 				app_name: "RenamerTV",
-				app_version: "0.0.1",
-				device_name: "PC dev"
+				app_version: "1.0.2",
+				device_name: device.model
  			 }
 			};
 
