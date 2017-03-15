@@ -124,10 +124,4 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova'])
 			}
 		});
 	};
-
-	$scope.testConnection = function() {
-		Freebox.apiVersion().then(function(data) {
-			alert('API version: ' + data.api_version);
-		});		
-	};	
 });

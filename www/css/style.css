@@ -51,8 +51,14 @@ table {
     overflow-y: hidden;
 }
 
+h1 {
+	color: #387ef5;
+}
 .item {
   padding: 2px;
+  border-color: #387ef5;
+  margin-top: 10px;
+  border-radius: 4px;
 }
 
 .cards {
