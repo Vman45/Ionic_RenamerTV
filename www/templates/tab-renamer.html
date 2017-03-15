@@ -1,7 +1,16 @@
 <ion-view view-title="RenamerTV">
   <ion-content class="padding">
-    <ion-list no-lines ng-repeat="item in items">
-		<ion-item>{{ item.name }} // {{ item.realname }}</ion-item>
+    <ion-list no-lines>
+		<ion-item ng-repeat="item in items">
+			<div class="cards">
+			  <div>
+				<img height="20px" ng-src="{{item.img}}">
+				<h1>{{item.name}}</h1>
+				<br />
+				<h3>{{item.realname}}</h3>
+			  </div>
+			</div>
+		</ion-item>
 	</ion-list>
 	<button class="button button-block button-outline button-positive" ng-click="loadFiles()">. . .</button>
 	<button class="button button-block button-outline button-positive" ng-click="matchFiles()">Matcher</button>

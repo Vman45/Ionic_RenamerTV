@@ -13,8 +13,6 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova'])
 			$scope.user.session_token = session_token;		
 
 			Freebox.list($scope.user.session_token).then(function(data) {
-				console.log("list", data);
-				
 				var items = [];
 				
 				angular.forEach(data.result, function(value, key) {
@@ -43,7 +41,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova'])
 				Show.getRealNameShow(value.name).then(function(data) {
 					var realnameShow = data.name + ' - ' + data.season + 'x' + data.episode + ' - ' + data.title + data.extension;
 
-					var item = { name: value.name, realname: realnameShow, fullname: value.fullname };			
+					var item = { name: value.name, realname: realnameShow, fullname: value.fullname, img: data.image };			
 					items.push(item);			
 				});
 			});
@@ -80,46 +78,9 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova'])
 	
 	$scope.user = {};
 	$scope.status = null;
-
+	
 	var track_id = localStorage.getItem('track_id');
 	var session_token = localStorage.getItem('session_token');
-
-	if(track_id === null) { // Vérifie si l'application est déjà enregistrer sur la Freebox
-		$scope.status = 'Veuillez vous authentifier';
-	} else { // Vérifie si il y une session en cours
-		if(session_token === null) {
-			
-			var app_token = localStorage.getItem('app_token');
-			
-			if(app_token !== null) { // Vérifie si l'application est déjà enregistrer sur la Freebox
-				Freebox.authOK(track_id).then(function(data) {
-					if(data.success) {
-						$scope.status = 'Connecté';
-						$scope.user.auth = 'true';
-						$scope.user.challenge = data.challenge;
-						$scope.user.confirm = data.status;
-						
-						// Inverser le challenge et app_token, la documentation est fausse
-						var password = CryptoJS.HmacSHA1($scope.user.challenge, app_token);
-
-						Freebox.openSession(password.toString()).then(function(data) {
-							console.log("openSession", data.success);
-							
-							if(data.success) {
-								$scope.user.session_token = data.token;
-								localStorage.setItem('session_token', data.token);
-							}
-						});
-					} 
-				});
-			}
-		} else {
-			$scope.status = 'Connecté';
-			
-			$scope.user.auth = 'true';
-			$scope.user.confirm = 'granted';
-		}
-	}
 	
 	$scope.auth = function() {
 		// Demande d'authentification
