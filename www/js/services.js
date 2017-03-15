@@ -132,18 +132,6 @@ angular.module('starter.services', [])
 			});
 			
 			return deferred.promise;
-		},
-		apiVersion:function() {
-			var cmd = "/api_version";
-			var deferred = $q.defer();
-			
-			$http.get(host + cmd).success(function(data) { 
-				deferred.resolve({ api_version: data.api_version });
-			}).error(function(msg, code) {
-				deferred.reject(msg);
-			});
-			
-			return deferred.promise;
 		}		
 	}
 })
@@ -158,8 +146,8 @@ angular.module('starter.services', [])
 		},
 		getRealNameShow: function(name) {
 			
-			var urlShow = "http://api.tvmaze.com/singlesearch/shows?q=";
-			var urlFullName = "http://api.tvmaze.com/shows/{show_id}/episodebynumber?season={show_season}&number={show_episode}";
+			var urlShow = "https://api.tvmaze.com/singlesearch/shows?q=";
+			var urlFullName = "https://api.tvmaze.com/shows/{show_id}/episodebynumber?season={show_season}&number={show_episode}";
 
 			var split_name = name.split('.S');
 
