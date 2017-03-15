@@ -62,7 +62,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova'])
 					var item = { name: value.name, realname: value.realname, fullname: value.fullname };
 
 					if(data.success) {
-						item = { name: 'OK', realname: value.realname, fullname: value.fullname };
+						item = { name: value.realname, realname: ';)', fullname: value.fullname, img: value.img };
 					}
 
 					items.push(item);			
