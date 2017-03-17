@@ -47,13 +47,10 @@ table {
 	border-spacing: 0;
 }
 
-.overflow-scroll {
-    overflow-y: hidden;
-}
-
 h1 {
 	color: #387ef5;
 }
+
 .item {
   padding: 2px;
   border-color: #387ef5;
