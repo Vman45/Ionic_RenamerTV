@@ -1,47 +1,47 @@
-(function() {
-    'use strict';
+(function () {
+	'use strict';
 
 	angular.module('starter.options', ['starter.services.freebox'])
 
-	.controller('OptionsCtrl', function($scope, Freebox) {
-	
+	.controller('OptionsCtrl', function ($scope, Freebox) {
+
 		$scope.user = {};
 		$scope.status = "Veuillez-vous authentifier !";
-		
+
 		var track_id = localStorage.getItem('track_id');
 		var app_token = localStorage.getItem('app_token');
 		var session_token = localStorage.getItem('session_token');
 
-		// Verifier si on est connectÈ seulement si on s'est dÈj‡ identifiÈ
-		if(app_token !== null && track_id !== null) {
-			Freebox.authOK(track_id).then(function(data) {
-				if(data.success) {
+		// Verifier si on est connect√© seulement si on s'est d√©j√† identifi√©
+		if (app_token !== null && track_id !== null) {
+			Freebox.authOK(track_id).then(function (data) {
+				if (data.success) {
 					$scope.user.challenge = data.challenge;
 					$scope.user.confirm = data.status;
-					
+
 					// Inverser le challenge et app_token, la documentation est fausse
 					var password = CryptoJS.HmacSHA1($scope.user.challenge, app_token);
 
-					Freebox.openSession(password.toString()).then(function(data) {
-						if(data.success) {
-							$scope.status = 'ConnectÈ';
+					Freebox.openSession(password.toString()).then(function (data) {
+						if (data.success) {
+							$scope.status = 'Connect√©';
 							$scope.user.auth = 'true';
 
 							$scope.user.session_token = data.token;
 							localStorage.setItem('session_token', data.token);
 						}
-					}).catch(function(data) {
-						$scope.status = "L'application a ÈtÈ revoquÈe, veuillez-vous identifier !";
-					});				
+					}).catch (function (data) {
+						$scope.status = "L'application a √©t√© revoqu√©e, veuillez-vous identifier !";
+					});
 				}
 			});
 		}
 
-		$scope.auth = function() {
+		$scope.auth = function () {
 			// Demande d'authentification
-			Freebox.auth().then(function(data) {
-				if(data.success) {
-					$scope.status = "Veuillez confirmer sur l'Ècran de la Freebox";
+			Freebox.auth().then(function (data) {
+				if (data.success) {
+					$scope.status = "Veuillez confirmer sur l'√©cran de la Freebox";
 					$scope.user.app_token = data.token;
 					$scope.user.track_id = data.track_id;
 					$scope.user.auth = 'true';
@@ -50,26 +50,26 @@
 				}
 			});
 		};
-		
-		$scope.authOK = function() {
-			// Valide l'authentification aprËs validation sur la Freebox
-			Freebox.authOK($scope.user.track_id).then(function(data) {
-				if(data.success) {
+
+		$scope.authOK = function () {
+			// Valide l'authentification apr√®s validation sur la Freebox
+			Freebox.authOK($scope.user.track_id).then(function (data) {
+				if (data.success) {
 					$scope.user.challenge = data.challenge;
 					$scope.user.confirm = data.status;
-					
+
 					// Inverser le challenge et app_token, la documentation est fausse
 					var password = CryptoJS.HmacSHA1($scope.user.challenge, $scope.user.app_token);
 
-					Freebox.openSession(password.toString()).then(function(data) {
-						if(data.success) {
-							$scope.status = 'ConnectÈ';
+					Freebox.openSession(password.toString()).then(function (data) {
+						if (data.success) {
+							$scope.status = 'Connect√©';
 							$scope.user.auth = 'true';
 
 							$scope.user.session_token = data.token;
 							localStorage.setItem('session_token', data.token);
 						}
-					});				
+					});
 				}
 			});
 		};

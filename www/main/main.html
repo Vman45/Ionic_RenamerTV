@@ -1,19 +1,26 @@
-<ion-view view-title="RenamerTV">
-  <ion-content class="padding">
-    <ion-list no-lines>
-		<ion-item ng-repeat="item in items">
-			<div class="cards">
-			  <div>
-				<img height="20px" ng-src="{{item.img}}">
-				<h1>{{item.name}}</h1>
-				<br />
-				<h3>{{item.realname}}</h3>
-			  </div>
-			</div>
-		</ion-item>
-	</ion-list>
-	<button class="button button-block button-outline button-positive" ng-click="loadFiles()">. . .</button>
-	<button class="button button-block button-outline button-positive" ng-click="matchFiles()">Matcher</button>
-	<button class="button button-block button-outline button-positive" ng-click="renameFiles()">Renommer</button>
-  </ion-content>
+<ion-view>
+	<ion-nav-title>RenamerTV</ion-nav-title>
+	<ion-nav-buttons side="right">
+		<i ng-if="connected" class="ion-checkmark-circled" style="color: green;"></i>
+		<i ng-if="!connected" class="ion-close-circled" style="color: red;"></i>
+	</ion-nav-buttons>
+	<ion-content class="padding">
+		<ion-list no-lines>
+			<ion-item ng-repeat="item in items">
+				<div class="cards" ng-click="takeIt(item)">
+					<div>
+						<img height="20px" ng-src="{{item.img}}">
+						<h1>{{item.name}}</h1>
+						<br />
+						<h3>{{item.realname}}</h3>
+					</div>
+					<i ng-if="item.checked" class="ion-checkmark"></i>
+					<i ng-if="!item.checked" class="ion-close-round"></i>
+				</div>
+			</ion-item>
+		</ion-list>
+		<button class="button button-block button-outline button-positive" ng-click="loadFiles()">. . .</button>
+		<button class="button button-block button-outline button-positive" ng-click="matchFiles()">Matcher</button>
+		<button class="button button-block button-outline button-positive" ng-click="renameFiles()">Renommer</button>
+	</ion-content>
 </ion-view>
