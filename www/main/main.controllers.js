@@ -23,6 +23,7 @@
 
 						Freebox.openSession(password.toString()).then(function (data) {
 							if (data.success) {
+								localStorage.setItem('session_token', data.token);
 								$scope.connected = true;
 							}
 						}).catch(function (data) {
